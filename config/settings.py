@@ -96,6 +96,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 #     }
 # }
 
+ssl_opts = {}
+if os.environ.get("DB_SSL_CA"):
+    ssl_opts["ca"] = os.environ["DB_SSL_CA"]
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
@@ -103,12 +107,13 @@ DATABASES = {
         "USER": os.environ.get("DB_USER"),
         "PASSWORD": os.environ.get("DB_PASSWORD"),
         "HOST": os.environ.get("DB_HOST"),
-        "PORT": os.environ.get("DB_PORT", "3306"),
+        "PORT": int(os.environ.get("DB_PORT", "4000")),
         "OPTIONS": {
-            "ssl": {"ca": os.environ.get("DB_SSL_CA")} if os.environ.get("DB_SSL_CA") else {},
+            "ssl": ssl_opts,
         },
     }
 }
+
 
 
 
