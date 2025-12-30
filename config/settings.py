@@ -96,9 +96,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 #     }
 # }
 
-ssl_opts = {}
-if os.environ.get("DB_SSL_CA"):
-    ssl_opts["ca"] = os.environ["DB_SSL_CA"]
+DB_SSL_CA = os.environ.get("DB_SSL_CA", "/etc/ssl/certs/ca-certificates.crt")
 
 DATABASES = {
     "default": {
@@ -109,7 +107,12 @@ DATABASES = {
         "HOST": os.environ.get("DB_HOST"),
         "PORT": int(os.environ.get("DB_PORT", "4000")),
         "OPTIONS": {
-            "ssl": ssl_opts,
+            # Force TLS (this is the key)
+            "ssl_mode": "REQUIRED",
+            # Provide CA bundle for verification
+            "ssl": {"ca": DB_SSL_CA},
+            # Optional but good
+            "init_command": "SET SESSION sql_mode='STRICT_TRANS_TABLES'",
         },
     }
 }
