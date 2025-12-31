@@ -5,7 +5,7 @@ Django settings for config project.
 import os
 from pathlib import Path
 
-# Optional: load .env locally (won't break Render)
+# Load .env locally if present (safe on Render)
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -14,10 +14,14 @@ except Exception:
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Environment switch: local vs production
+# ------------------------------------------------------------------
+# Environment
+# ------------------------------------------------------------------
 ENV = os.environ.get("ENV", "local").strip().lower()
 
-# SECURITY
+# ------------------------------------------------------------------
+# Security
+# ------------------------------------------------------------------
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret")
 DEBUG = os.environ.get("DEBUG", "0") == "1"
 
@@ -33,7 +37,9 @@ CSRF_TRUSTED_ORIGINS = [
     if o.strip()
 ]
 
-# Application definition
+# ------------------------------------------------------------------
+# Applications
+# ------------------------------------------------------------------
 INSTALLED_APPS = [
     "todoapp",
     "django.contrib.admin",
@@ -74,7 +80,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Database (Local MySQL vs Render TiDB)
+# ------------------------------------------------------------------
+# Database (LOCAL MySQL vs RENDER TiDB)
+# ------------------------------------------------------------------
 DB_NAME = os.environ.get("DB_NAME")
 DB_USER = os.environ.get("DB_USER")
 DB_PASSWORD = os.environ.get("DB_PASSWORD")
@@ -85,12 +93,16 @@ DATABASE_OPTIONS = {
     "init_command": "SET SESSION sql_mode='STRICT_TRANS_TABLES'",
 }
 
-# Enable TLS only in production (TiDB Cloud requires TLS)
-if ENV == "production":
+# 🔐 FORCE TLS when using TiDB (Render)
+# Either ENV=production OR port 4000 guarantees SSL
+if ENV == "production" or DB_PORT == 4000:
     DATABASE_OPTIONS.update({
         "ssl_mode": "REQUIRED",
         "ssl": {
-            "ca": os.environ.get("DB_SSL_CA", "/etc/ssl/certs/ca-certificates.crt"),
+            "ca": os.environ.get(
+                "DB_SSL_CA",
+                "/etc/ssl/certs/ca-certificates.crt"
+            ),
         },
     })
 
@@ -106,7 +118,9 @@ DATABASES = {
     }
 }
 
+# ------------------------------------------------------------------
 # Password validation
+# ------------------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -114,15 +128,21 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# ------------------------------------------------------------------
 # Internationalization
+# ------------------------------------------------------------------
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
+# ------------------------------------------------------------------
 # Static files
+# ------------------------------------------------------------------
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Default primary key field type
+# ------------------------------------------------------------------
+# Default primary key
+# ------------------------------------------------------------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
