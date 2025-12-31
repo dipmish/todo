@@ -4,6 +4,7 @@ class Todo(models.Model):
     # t_id explicitly (instead of default id)
     t_id = models.AutoField(primary_key=True)
     todo_name = models.CharField(max_length=255)
+    todo_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "todo"   # table name fixed as "todo"
