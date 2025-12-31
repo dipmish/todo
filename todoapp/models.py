@@ -6,6 +6,7 @@ class Todo(models.Model):
     todo_name = models.CharField(max_length=255)
     todo_at = models.DateTimeField(auto_now_add=True)
     todo_person = models.CharField(max_length=255, null=True, blank=True)
+    todo_indivi = models.CharField(max_length=255, null=True, blank=True)
 
     
 
